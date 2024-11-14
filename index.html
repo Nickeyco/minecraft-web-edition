@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html >
+    <head>
+        <title>minecraft web edition</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <link href="style/main.css" rel="stylesheet" type="text/css">
+        <link href="media/favicon.png" rel="icon" type="image/png" sizes="128x128">
+        <style></style>
+    </head>
+    <body>
+        <script>
+    function esperarYEnviar(event) {
+      event.preventDefault(); // Evita el envío inmediato del formulario
+
+      // Espera 1 segundo (1000 ms) antes de enviar el formulario
+      setTimeout(function() {
+        // Envía el formulario después de 1 segundo
+        document.getElementById('miFormulario').submit();
+      }, 200);
+    }
+  </script>
+        <audio id="clickSound" src="sounds/gui/Click_stereo.ogg.mp3" preload="auto"></audio>
+        <div class="separar"></div>
+        <div class="logo" ></div>
+        <div class="gui"> <div class="mainmenu"> <form id="miFormulario" onsubmit="esperarYEnviar(event)" method="post" action="singleplayer.html" ><button id="playButton" type="submit" class="button">Singleplayer</button></form>  
+                <form method="post" action="multiplayer.html" ><button type="submit" class="button" disabled="" >Multiplayer</button></form>
+        </div>
+        </div>
+
+    <script>
+   document.addEventListener('DOMContentLoaded', function() {
+        const playButton = document.getElementById('playButton');
+        const clickSound = document.getElementById('clickSound');
+    
+            playButton.addEventListener('click', () => {
+                clickSound.play();
+            });
+    });
+    </script>
+        
+        
+        
+
+        <div class="separar1"></div>
+        <a class="version">minecraft web edition Alpha 0.1</a>
+        
+    </body>
+</html>
