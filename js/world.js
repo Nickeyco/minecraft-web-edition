@@ -43,10 +43,15 @@ World.prototype.createFlatWorld = function( height )
 {
     this.spawnPoint = new Vector( this.sx / 2 + 0.5, this.sy / 2 + 0.5, height );
     
-    for ( var x = 0; x < this.sx; x++ )
-        for ( var y = 0; y < this.sy; y++ )
-            for ( var z = 0; z < this.sz; z++ )
-                this.blocks[x][y][z] = z < height ? BLOCK.DIRT : BLOCK.AIR;
+    for ( var z = 0; z < this.sz; z++ )
+            {
+                if (z < height)
+                    this.blocks[x][y][z] = BLOCK.STONE;  // Ground layer
+                else if (z < height + 2)
+                    this.blocks[x][y][z] = BLOCK.GRASS;  // Grass on top of dirt
+                else
+                    this.blocks[x][y][z] = BLOCK.AIR;  // Above ground is air
+            }
 }
 
 // createRealisticWorld()
