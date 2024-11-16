@@ -134,7 +134,7 @@ BLOCK.COBBLESTONE = {
 };
 
 // Concrete
-BLOCK.CONCRETE = {
+BLOCK.STONE = {
 	id: 9,
 	spawnable: true,
 	transparent: false,
