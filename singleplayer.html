@@ -1,0 +1,83 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Minecrraft web edition</title>
+		
+		<!-- Character encoding -->
+		<meta http-equiv="content-type" content="text/html;charset=utf-8">
+                        <link href="media/favicon.png" rel="icon" type="image/png">
+		
+		<!-- Stylesheet -->
+		<link href="style/main.css" rel="stylesheet" type="text/css">
+		
+		<!-- Modules -->
+		<script src="js/blocks.js" ></script>
+		<script src="js/world.js"  ></script>
+		<script src="js/glMatrix-1.2.min.js"></script>
+		<script src="js/helpers.js"></script>
+		<script src="js/physics.js"></script>
+		<script src="js/player.js" ></script>
+		<script src="js/render.js" ></script>
+	</head>
+	
+	<body oncontextmenu="return false">
+                        <img hidden="" src="media/terrain.png" >
+                        <audio id="clickSound" src="sounds/gui/Click_stereo.ogg.mp3" preload="auto"></audio>
+		<!-- Render surface -->
+		<canvas id="renderSurface"></canvas>
+		
+		<!-- Material selection -->
+		<table id="materialSelector">
+                            <tr>  </tr>
+		</table>
+		
+		<!-- Initialisation code -->
+		<script >			
+                            
+			// Create a new flat world
+			var world = new World( 80 , 80 , 80 );
+			world.createFlatWorld( 40 );
+			
+			// Set up renderer
+			var render = new Renderer( "renderSurface" );
+			render.setWorld( world, 16 );
+			render.setPerspective( 60, 0.01, 60 );
+			
+			// Create physics simulator
+			var physics = new Physics();
+			physics.setWorld( world );
+			
+			// Create new local player
+			var player = new Player();
+			player.setWorld( world );
+			player.setInputCanvas( "renderSurface" );
+			player.setMaterialSelector( "materialSelector" );
+                                    // Handle open chat on 't' event
+					player.on( "openChat", function()
+					{
+						page.chatboxEntry.focus();
+						page.chatbox.style.height = ( render.gl.viewportHeight - 145 ) + "px";
+					} );			
+			// Render loop			
+			setInterval( function()
+			{
+				var time = new Date().getTime() / 1000.0;
+				
+				// Simulate physics
+				physics.simulate();
+				
+				// Update local player
+				player.update();
+				
+				// Build a chunk
+				render.buildChunks( 400 );
+				
+				// Draw world
+				render.setCamera( player.getEyePos().toArray(), player.angles );
+				render.draw();
+				
+				while ( new Date().getTime() / 1000 - time < 0.014 );
+			}, 1 );
+		</script>
+	</body>
+</html>
