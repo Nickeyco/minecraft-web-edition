@@ -134,7 +134,7 @@ BLOCK.COBBLESTONE = {
 };
 
 // Concrete
-BLOCK.STONE = {
+BLOCK.CONCRETE = {
 	id: 9,
 	spawnable: true,
 	transparent: false,
@@ -248,6 +248,59 @@ BLOCK.WATER = {
     gravity: true,
     fluid: true,
     texture: function(){}
+};
+// Leaves
+BLOCK.LEAVES = {
+	id: 20,
+	spawnable: true,
+	transparent: true, // Las hojas son parcialmente transparentes
+	selflit: false,
+	gravity: false,
+	fluid: false,
+	texture: function(world, lightmap, lit, x, y, z, dir) {
+		return [9/16, 1/16, 10/16, 2/16]; // Posición de la textura de hojas en el terrain.png
+	},
+	color: function(x, y, z) {
+		// Ajuste de color (ejemplo: verde oscuro con un poco de variación)
+		const baseColor = { r: 0.2, g: 0.8, b: 0.2, a: 1.0 }; // Verde
+		const variation = (x + y + z) % 3 * 0.05; // Variación sutil por coordenada
+		return {
+			r: baseColor.r + variation,
+			g: baseColor.g - variation,
+			b: baseColor.b + variation * 0.5,
+			a: baseColor.a
+		};
+	}
+};
+
+// Modificar pushVertices para aplicar color
+BLOCK.pushVertices = function(vertices, world, lightmap, x, y, z) {
+	var blocks = world.blocks;
+	var blockLit = z >= lightmap[x][y];
+	var block = blocks[x][y][z];
+	var bH = block.fluid && (z == world.sz - 1 || !blocks[x][y][z + 1].fluid) ? 0.9 : 1.0;
+
+	// Obtener color del bloque si tiene color definido
+	var blockColor = block.color ? block.color(x, y, z) : { r: 1.0, g: 1.0, b: 1.0, a: 1.0 };
+
+	// Top
+	if (z == world.sz - 1 || world.blocks[x][y][z + 1].transparent || block.fluid) {
+		var c = block.texture(world, lightmap, blockLit, x, y, z, DIRECTION.UP);
+
+		var lightMultiplier = z >= lightmap[x][y] ? 1.0 : 0.6;
+		if (block.selflit) lightMultiplier = 1.0;
+
+		pushQuad(
+			vertices,
+			[ x, y, z + bH, c[0], c[1], blockColor.r * lightMultiplier, blockColor.g * lightMultiplier, blockColor.b * lightMultiplier, blockColor.a ],
+			[ x + 1.0, y, z + bH, c[2], c[1], blockColor.r * lightMultiplier, blockColor.g * lightMultiplier, blockColor.b * lightMultiplier, blockColor.a ],
+			[ x + 1.0, y + 1.0, z + bH, c[2], c[3], blockColor.r * lightMultiplier, blockColor.g * lightMultiplier, blockColor.b * lightMultiplier, blockColor.a ],
+			[ x, y + 1.0, z + bH, c[0], c[3], blockColor.r * lightMultiplier, blockColor.g * lightMultiplier, blockColor.b * lightMultiplier, blockColor.a ]
+		);
+	}
+
+	// (Repetir el mismo proceso para los otros lados: Bottom, Front, Back, Left, Right)
+	// Usar blockColor en los colores de cada cara
 };
 
 // fromId( id )

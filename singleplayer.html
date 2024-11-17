@@ -35,13 +35,13 @@
 		<script >			
                             
 			// Create a new flat world
-			var world = new World( 64 , 64 , 80 );
+			var world = new World( 80 , 80 , 80 );
 			world.createFlatWorld( 40 );
 			
 			// Set up renderer
 			var render = new Renderer( "renderSurface" );
 			render.setWorld( world, 16 );
-			render.setPerspective( 60, 0.01, 50 );
+			render.setPerspective( 60, 0.01, 60 );
 			
 			// Create physics simulator
 			var physics = new Physics();
@@ -70,7 +70,7 @@
 				player.update();
 				
 				// Build a chunk
-				render.buildChunks( 800 );
+				render.buildChunks( 400 );
 				
 				// Draw world
 				render.setCamera( player.getEyePos().toArray(), player.angles );

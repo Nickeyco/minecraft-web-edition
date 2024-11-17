@@ -39,9 +39,7 @@ function World( sx, sy, sz )
 // Sets up the world so that the bottom half is filled with dirt
 // and the top half with air.
 
-
-    
-   World.prototype.createFlatWorld = function( height )
+World.prototype.createFlatWorld = function( height )
 {
     this.spawnPoint = new Vector( this.sx / 2 + 0.5, this.sy / 2 + 0.5, height );
     
@@ -50,36 +48,37 @@ function World( sx, sy, sz )
             for ( var z = 0; z < this.sz; z++ )
                 this.blocks[x][y][z] = z < height ? BLOCK.DIRT : BLOCK.AIR;
 }
+const fs = require("fs");
+const path = require("path");
 
-// createRealisticWorld()
-//
-// Sets up the world with realistic features like mountains and valleys.
-// Generates terrain based on noise to simulate a natural world.
+World.prototype.createDefaultWorld = function (centerX, centerY, centerZ) {
+    this.spawnPoint = new Vector(centerX, centerY, centerZ);
+    const limit = 255; // Define el límite desde el centro
 
-World.prototype.createRealisticWorld = function( height )
-{
-    this.spawnPoint = new Vector( this.sx / 2 + 0.5, this.sy / 2 + 0.5, height / 2 );
-    
-    // Simple noise-based terrain generation (realistic effect)
-    for ( var x = 0; x < this.sx; x++ )
-    {
-        for ( var y = 0; y < this.sy; y++ )
-        {
-            // Simple noise function: create realistic height variation
-            var height = Math.sin((x + y) / 20) * height + height / 2;
-            
-            for ( var z = 0; z < this.sz; z++ )
-            {
-                if (z < height)
-                    this.blocks[x][y][z] = BLOCK.STONE;  // Ground layer
-                else if (z < height + 2)
-                    this.blocks[x][y][z] = BLOCK.GRASS;  // Grass on top of dirt
-                else
-                    this.blocks[x][y][z] = BLOCK.AIR;  // Above ground is air
+    // Cargar datos desde la carpeta 'seed'
+    const seedPath = path.join(__dirname, "seed");
+    const seedFiles = fs.readdirSync(seedPath);
+
+    if (seedFiles.length !== 64) {
+        throw new Error("La carpeta 'seed' debe contener exactamente 64 archivos.");
+    }
+
+    // Crear bloques según los patrones en los archivos de la carpeta 'seed'
+    for (let x = -limit; x <= limit; x++) {
+        for (let y = -limit; y <= limit; y++) {
+            const seedIndex = Math.abs((x + y) % seedFiles.length);
+            const seedFile = seedFiles[seedIndex];
+            const seedData = fs.readFileSync(path.join(seedPath, seedFile), "utf8");
+            const zPattern = seedData.split("\n").map((line) => line.split("").map(Number)); // Asume que los archivos contienen patrones de terreno en líneas
+
+            for (let z = 0; z < this.sz; z++) {
+                const isSolid = zPattern[x % zPattern.length]?.[y % zPattern[0].length] || 0;
+                this.blocks[x + centerX][y + centerY][z] = isSolid ? BLOCK.DIRT : BLOCK.AIR;
             }
         }
     }
-}
+};
+
 
 // createFromString( str )
 //
