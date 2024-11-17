@@ -126,11 +126,11 @@
 
 					// Set up renderer and build level chunks
 					render = new Renderer( "renderSurface" );
-					render.setWorld( world, 8 );
-					render.setPerspective( 60, 0.01, 200 );
+					render.setWorld( world, 16 );
+					render.setPerspective( 60, 0.01, 60 );
 
 					// Build all world chunks
-					render.buildChunks( 999 );
+					render.buildChunks( 25600 );
 
 					page.joinInfoText.innerHTML = "Spawning...";
 				} );
@@ -175,7 +175,7 @@
 						}
 
 						// Build chunks
-						render.buildChunks( 5 );
+						render.buildChunks( 8 );
 
 						// Draw world
 						render.setCamera( player.getEyePos().toArray(), player.angles );
