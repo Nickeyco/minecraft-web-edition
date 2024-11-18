@@ -14,60 +14,60 @@
 // sx - World size in the X-direction.
 // sy - World size in the Y-direction.
 // sz - World size in the Z-direction.
-
-function World( sx, sy, sz )
-{
-    // Initialise world array
-    this.blocks = new Array( sx );
-    for ( var x = 0; x < sx; x++ )
-    {
-        this.blocks[x] = new Array( sy );
-        for ( var y = 0; y < sy; y++ )
-        {
-            this.blocks[x][y] = new Array( sz );
+function World(sx, sy, sz) {
+    // Inicializar el array de bloques
+    this.blocks = new Array(sx);
+    for (let x = 0; x < sx; x++) {
+        this.blocks[x] = new Array(sy);
+        for (let y = 0; y < sy; y++) {
+            this.blocks[x][y] = new Array(sz);
         }
     }
     this.sx = sx;
     this.sy = sy;
     this.sz = sz;
-    
+
     this.players = {};
 }
 
-// createFlatWorld()
-//
-// Sets up the world so that the bottom half is filled with dirt
-// and the top half with air.
+// Crear un mundo plano
+World.prototype.createFlatWorld = function (height) {
+    this.spawnPoint = new Vector(this.sx / 2 + 0.5, this.sy / 2 + 0.5, height);
 
-World.prototype.createFlatWorld = function( height )
-{
-    this.spawnPoint = new Vector( this.sx / 2 + 0.5, this.sy / 2 + 0.5, height );
-    
-    for ( var x = 0; x < this.sx; x++ )
-        for ( var y = 0; y < this.sy; y++ )
-            for ( var z = 0; z < this.sz; z++ )
+    for (let x = 0; x < this.sx; x++) {
+        for (let y = 0; y < this.sy; y++) {
+            for (let z = 0; z < this.sz; z++) {
                 this.blocks[x][y][z] = z < height ? BLOCK.DIRT : BLOCK.AIR;
-}
+            }
+        }
+    }
+};
 
+// Crear un mundo predeterminado usando datos de archivos de semilla
 World.prototype.createDefaultWorld = async function (centerX, centerY, centerZ) {
     this.spawnPoint = new Vector(centerX, centerY, centerZ);
     const limit = 255; // Define el límite desde el centro
 
-    // Simular cargar datos desde URLs
+    // Archivos de semilla simulados
     const seedFiles = [];
     for (let i = 0; i < 64; i++) {
-        seedFiles.push(`seed/seed${i}.txt`); // Rutas relativas a los archivos de semilla
+        seedFiles.push(`seed/seed${i}.txt`); // Rutas relativas
     }
 
+    const fetchPromises = seedFiles.map(async (seedURL) => {
+        const response = await fetch(seedURL);
+        return response.text();
+    });
+
+    // Cargar todas las semillas de forma paralela
+    const seedDataArray = await Promise.all(fetchPromises);
+
+    // Procesar las semillas y construir el mundo
     for (let x = -limit; x <= limit; x++) {
         for (let y = -limit; y <= limit; y++) {
-            const seedIndex = Math.abs((x + y) % seedFiles.length);
-            const seedURL = seedFiles[seedIndex];
-
-            // Fetch para obtener datos
-            const response = await fetch(seedURL);
-            const seedData = await response.text();
-            const zPattern = seedData.split("\n").map((line) => line.split("").map(Number)); // Patrones de terreno
+            const seedIndex = Math.abs((x + y) % seedDataArray.length);
+            const seedData = seedDataArray[seedIndex];
+            const zPattern = seedData.split("\n").map((line) => line.split("").map(Number));
 
             for (let z = 0; z < this.sz; z++) {
                 const isSolid = zPattern[x % zPattern.length]?.[y % zPattern[0].length] || 0;
@@ -77,115 +77,20 @@ World.prototype.createDefaultWorld = async function (centerX, centerY, centerZ) 
     }
 };
 
-
-    // Crear bloques según los patrones en los archivos de la carpeta 'seed'
-    for (let x = -limit; x <= limit; x++) {
-        for (let y = -limit; y <= limit; y++) {
-            const seedIndex = Math.abs((x + y) % seedFiles.length);
-            const seedFile = seedFiles[seedIndex];
-            const seedData = fs.readFileSync(path.join(seedPath, seedFile), "utf8");
-            const zPattern = seedData.split("\n").map((line) => line.split("").map(Number)); // Asume que los archivos contienen patrones de terreno en líneas
-
-            for (let z = 0; z < this.sz; z++) {
-                const isSolid = zPattern[x % zPattern.length]?.[y % zPattern[0].length] || 0;
-                this.blocks[x + centerX][y + centerY][z] = isSolid ? BLOCK.DIRT : BLOCK.AIR;
-            }
-        }
-    }
-};
-
-
-// createFromString( str )
-//
-// Creates a world from a string representation.
-// This is the opposite of toNetworkString().
-//
-// NOTE: The world must have already been created
-// with the appropriate size!
-
-World.prototype.createFromString = function( str )
-{
-    var i = 0;
-    
-    for ( var x = 0; x < this.sx; x++ ) {
-        for ( var y = 0; y < this.sy; y++ ) {
-            for ( var z = 0; z < this.sz; z++ ) {
-                this.blocks[x][y][z] = BLOCK.fromId( str.charCodeAt( i ) - 97 );
-                i = i + 1;
-            }
-        }
-    }
-}
-
-// getBlock( x, y, z )
-//
-// Get the type of the block at the specified position.
-// Mostly for neatness, since accessing the array
-// directly is easier and faster.
-
-World.prototype.getBlock = function( x, y, z )
-{
-    if ( x < 0 || y < 0 || z < 0 || x > this.sx - 1 || y > this.sy - 1 || z > this.sz - 1 ) return BLOCK.AIR;
+// Obtener el bloque en una posición específica
+World.prototype.getBlock = function (x, y, z) {
+    if (x < 0 || y < 0 || z < 0 || x >= this.sx || y >= this.sy || z >= this.sz) return BLOCK.AIR;
     return this.blocks[x][y][z];
-}
+};
 
-// setBlock( x, y, z )
-
-World.prototype.setBlock = function( x, y, z, type )
-{
+// Establecer un bloque en una posición específica
+World.prototype.setBlock = function (x, y, z, type) {
     this.blocks[x][y][z] = type;
-    if ( this.renderer != null ) this.renderer.onBlockChanged( x, y, z );
+    if (this.renderer != null) this.renderer.onBlockChanged(x, y, z);
+};
+
+// Exportar para su uso en el navegador
+if (typeof window !== "undefined") {
+    window.World = World;
 }
 
-// toNetworkString()
-//
-// Returns a string representation of this world.
-
-World.prototype.toNetworkString = function()
-{
-    var blockArray = [];
-    
-    for ( var x = 0; x < this.sx; x++ )
-        for ( var y = 0; y < this.sy; y++ )
-            for ( var z = 0; z < this.sz; z++ )
-                blockArray.push( String.fromCharCode( 97 + this.blocks[x][y][z].id ) );
-    
-    return blockArray.join( "" );
-}
-
-// Export to node.js
-if ( typeof( exports ) != "undefined" )
-{
-    // loadFromFile( filename )
-    //
-    // Load a world from a file previously saved with saveToFile().
-    // The world must have already been allocated with the
-    // appropriate dimensions.
-    
-    World.prototype.loadFromFile = function( filename )
-    {
-        var fs = require( "fs" );
-        try {
-            fs.lstatSync( filename );
-            var data = fs.readFileSync( filename, "utf8" ).split( "," );
-            this.createFromString( data[3] );
-            this.spawnPoint = new Vector( parseInt( data[0] ), parseInt( data[1] ), parseInt( data[2] ) );
-            return true;
-        } catch ( e ) {
-            return false;
-        }
-    }
-    
-    // saveToFile( filename )
-    //
-    // Saves a world and the spawn point to a file.
-    // The world can be loaded from it afterwards with loadFromFile().
-    
-    World.prototype.saveToFile = function( filename )
-    {
-        var data = this.spawnPoint.x + "," + this.spawnPoint.y + "," + this.spawnPoint.z + "," + this.toNetworkString();
-        require( "fs" ).writeFileSync( filename, data );    
-    }
-    
-    exports.World = World;
-}
