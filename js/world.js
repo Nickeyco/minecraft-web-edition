@@ -49,23 +49,34 @@ World.prototype.createFlatWorld = function( height )
                 this.blocks[x][y][z] = z < height ? BLOCK.DIRT : BLOCK.AIR;
 }
 
-import fs from "fs";
-import path from "path";
-
-
-World.prototype.createDefaultWorld = function (centerX, centerY, centerZ) {
+World.prototype.createDefaultWorld = async function (centerX, centerY, centerZ) {
     this.spawnPoint = new Vector(centerX, centerY, centerZ);
     const limit = 255; // Define el límite desde el centro
 
-
-
-    // Cargar datos desde la carpeta 'seed'
-    const seedPath = path.join(__dirname, "seed");
-    const seedFiles = fs.readdirSync(seedPath);
-
-    if (seedFiles.length !== 64) {
-        throw new Error("La carpeta 'seed' debe contener exactamente 64 archivos.");
+    // Simular cargar datos desde URLs
+    const seedFiles = [];
+    for (let i = 0; i < 64; i++) {
+        seedFiles.push(`seed/seed${i}.txt`); // Rutas relativas a los archivos de semilla
     }
+
+    for (let x = -limit; x <= limit; x++) {
+        for (let y = -limit; y <= limit; y++) {
+            const seedIndex = Math.abs((x + y) % seedFiles.length);
+            const seedURL = seedFiles[seedIndex];
+
+            // Fetch para obtener datos
+            const response = await fetch(seedURL);
+            const seedData = await response.text();
+            const zPattern = seedData.split("\n").map((line) => line.split("").map(Number)); // Patrones de terreno
+
+            for (let z = 0; z < this.sz; z++) {
+                const isSolid = zPattern[x % zPattern.length]?.[y % zPattern[0].length] || 0;
+                this.blocks[x + centerX][y + centerY][z] = isSolid ? BLOCK.DIRT : BLOCK.AIR;
+            }
+        }
+    }
+};
+
 
     // Crear bloques según los patrones en los archivos de la carpeta 'seed'
     for (let x = -limit; x <= limit; x++) {
