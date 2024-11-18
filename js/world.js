@@ -48,12 +48,16 @@ World.prototype.createFlatWorld = function( height )
             for ( var z = 0; z < this.sz; z++ )
                 this.blocks[x][y][z] = z < height ? BLOCK.DIRT : BLOCK.AIR;
 }
-const fs = require("fs");
-const path = require("path");
+
+import fs from "fs";
+import path from "path";
+
 
 World.prototype.createDefaultWorld = function (centerX, centerY, centerZ) {
     this.spawnPoint = new Vector(centerX, centerY, centerZ);
     const limit = 255; // Define el límite desde el centro
+
+
 
     // Cargar datos desde la carpeta 'seed'
     const seedPath = path.join(__dirname, "seed");

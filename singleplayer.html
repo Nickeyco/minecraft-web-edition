@@ -12,7 +12,7 @@
 		
 		<!-- Modules -->
 		<script src="js/blocks.js" ></script>
-		<script src="js/world.js"  ></script>
+		<script src="js/world.js"></script>
 		<script src="js/glMatrix-1.2.min.js"></script>
 		<script src="js/helpers.js"></script>
 		<script src="js/physics.js"></script>
@@ -32,52 +32,64 @@
 		</table>
 		
 		<!-- Initialisation code -->
-		<script >			
-                            
-			// Create a new flat world
-			var world = new World( 80 , 80 , 80 );
-			world.createFlatWorld( 40 );
-			
-			// Set up renderer
-			var render = new Renderer( "renderSurface" );
-			render.setWorld( world, 16 );
-			render.setPerspective( 60, 0.01, 60 );
-			
-			// Create physics simulator
-			var physics = new Physics();
-			physics.setWorld( world );
-			
-			// Create new local player
-			var player = new Player();
-			player.setWorld( world );
-			player.setInputCanvas( "renderSurface" );
-			player.setMaterialSelector( "materialSelector" );
-                                    // Handle open chat on 't' event
-					player.on( "openChat", function()
-					{
-						page.chatboxEntry.focus();
-						page.chatbox.style.height = ( render.gl.viewportHeight - 145 ) + "px";
-					} );			
-			// Render loop			
-			setInterval( function()
-			{
-				var time = new Date().getTime() / 1000.0;
-				
-				// Simulate physics
-				physics.simulate();
-				
-				// Update local player
-				player.update();
-				
-				// Build a chunk
-				render.buildChunks( 400 );
-				
-				// Draw world
-				render.setCamera( player.getEyePos().toArray(), player.angles );
-				render.draw();
-				
-				while ( new Date().getTime() / 1000 - time < 0.014 );
-			}, 1 );
+		<script type="module">
+    import { World } from "./js/world.js";
+
+    // Tamaño del mundo
+    const worldSizeX = 255;
+    const worldSizeY = 255;
+    const worldSizeZ = 164;
+
+    // Crear instancia del mundo
+    const world = new World(worldSizeX, worldSizeY, worldSizeZ);
+
+    // Crear el mundo por defecto
+    const spawnX = Math.floor(worldSizeX / 2);
+    const spawnY = Math.floor(worldSizeY / 2);
+    const spawnZ = 64;
+    world.createDefaultWorld(spawnX, spawnY, spawnZ);
+
+
+    // Configurar el renderizador
+    var render = new Renderer("renderSurface");
+    render.setWorld(world, 16);
+    render.setPerspective(60, 0.01, 60);
+
+    // Crear el simulador de física
+    var physics = new Physics();
+    physics.setWorld(world);
+
+    // Crear nuevo jugador local
+    var player = new Player();
+    player.setWorld(world);
+    player.setInputCanvas("renderSurface");
+    player.setMaterialSelector("materialSelector");
+
+    // Manejar el evento de abrir el chat con 't'
+    player.on("openChat", function () {
+        page.chatboxEntry.focus();
+        page.chatbox.style.height = (render.gl.viewportHeight - 145) + "px";
+    });
+
+    // Bucle de renderizado
+    setInterval(function () {
+        var time = new Date().getTime() / 1000.0;
+
+        // Simular física
+        physics.simulate();
+
+        // Actualizar jugador local
+        player.update();
+
+        // Construir un chunk
+        render.buildChunks(400);
+
+        // Dibujar mundo
+        render.setCamera(player.getEyePos().toArray(), player.angles);
+        render.draw();
+
+        while (new Date().getTime() / 1000 - time < 0.014);
+    }, 1);
 		</script>
 	</body>
 </html>

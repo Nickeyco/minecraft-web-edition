@@ -1,0 +1,12 @@
+<html>
+<head>
+</head>
+<body>
+<script>
+const { createSeedFiles } = require("js/seed-API.js");
+
+// Crear 5 semillas de tamaño 10x10 con ruido Perlin
+createSeedFiles(5, 10);
+
+</script>
+</body>
