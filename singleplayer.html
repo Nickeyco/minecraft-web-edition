@@ -78,7 +78,9 @@
         physics.simulate();
 
         // Actualizar jugador local
-        player.update();
+        function update(player) {
+    render(player.getEyePos()); // Llama a la función de renderizado con la posición del jugador
+}
 
         // Construir un chunk
         render.buildChunks(400);
