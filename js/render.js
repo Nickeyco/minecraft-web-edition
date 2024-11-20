@@ -75,42 +75,57 @@ Renderer.prototype.isBlockInChunk = function(x, y, z, chunk) {
 }
 
 // Build chunks and update buffers
-Renderer.prototype.buildChunks = function(count) {
+Renderer.prototype.buildChunks = function(count, playerPos) {
     var gl = this.gl;
     var chunks = this.chunks;
     var world = this.world;
 
+    // Determina el rango de carga alrededor del jugador
+    const loadDistance = 32; // Distancia de carga en bloques
+    const startX = Math.max(0, Math.floor(playerPos.x) - loadDistance);
+    const endX = Math.min(world.sx - 1, Math.floor(playerPos.x) + loadDistance);
+    const startY = Math.max(0, Math.floor(playerPos.y) - loadDistance);
+    const endY = Math.min(world.sy - 1, Math.floor(playerPos.y) + loadDistance);
+    const startZ = Math.max(0, Math.floor(playerPos.z) - loadDistance);
+    const endZ = Math.min(world.sz - 1, Math.floor(playerPos.z) + loadDistance);
+
     for (var i = 0; i < chunks.length; i++) {
         var chunk = chunks[i];
-        
-        if (chunk.dirty) {
-            var vertices = [];
-            var lightmap = this.createLightmap(chunk);
+
+        // Verifica si el chunk está dentro del rango de carga
+        if (chunk.start[0] >= startX && chunk.end[0] <= endX &&
+            chunk.start[1] >= startY && chunk.end[1] <= endY &&
+            chunk.start[2] >= startZ && chunk.end[2] <= endZ) {
             
-            // Add vertices for blocks in the chunk
-            for (var x = chunk.start[0]; x < chunk.end[0]; x++) {
-                for (var y = chunk.start[1]; y < chunk.end[1]; y++) {
-                    for (var z = chunk.start[2]; z < chunk.end[2]; z++) {
-                        if (world.blocks[x][y][z] != BLOCK.AIR) {
-                            BLOCK.pushVertices(vertices, world, lightmap, x, y, z);
+            if (chunk.dirty) {
+                var vertices = [];
+                var lightmap = this.createLightmap(chunk);
+                
+                // Agrega los vértices para los bloques en el chunk
+                for (var x = chunk.start[0]; x < chunk.end[0]; x++) {
+                    for (var y = chunk.start[1]; y < chunk.end[1]; y++) {
+                        for (var z = chunk.start[2]; z < chunk.end[2]; z++) {
+                            if (world.blocks[x][y][z] != BLOCK.AIR) {
+                                BLOCK.pushVertices(vertices, world, lightmap, x, y, z);
+                            }
                         }
                     }
                 }
-            }
 
-            if (chunk.buffer) {
-                // Update buffer data instead of recreating it
-                gl.bindBuffer(gl.ARRAY_BUFFER, chunk.buffer);
-                gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(vertices));
-            } else {
-                chunk.buffer = gl.createBuffer();
-                chunk.buffer.vertices = vertices.length / 9;
-                gl.bindBuffer(gl.ARRAY_BUFFER, chunk.buffer);
-                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+                if (chunk.buffer) {
+                    // Actualiza los datos del buffer en lugar de recrearlo
+                    gl.bindBuffer(gl.ARRAY_BUFFER, chunk.buffer);
+                    gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(vertices));
+                } else {
+                    chunk.buffer = gl.createBuffer();
+                    chunk.buffer.vertices = vertices.length / 9;
+                    gl.bindBuffer(gl.ARRAY_BUFFER, chunk.buffer);
+                    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+                }
+                
+                chunk.dirty = false;
+                count--;
             }
-            
-            chunk.dirty = false;
-            count--;
         }
 
         if (count == 0) break;
