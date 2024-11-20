@@ -80,7 +80,12 @@
         // Actualizar jugador local
         function update(player) {
     render(player.getEyePos()); // Llama a la función de renderizado con la posición del jugador
+function update(player) {
+    // ... lógica de actualización existente ...
+    // Llama a buildChunks con la posición del jugador
+    renderer.buildChunks(count, player.getEyePos());
 }
+	}
 
         // Construir un chunk
         render.buildChunks(400);
