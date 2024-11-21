@@ -15,11 +15,9 @@
 
 function Client( socketio )
 {
-            this.src="js/socket.io";
 	this.io = socketio;
 	this.eventHandlers = {};
 	this.kicked = false;
-            this.crossOrigin = "anonymous";
 }
 
 // connect( uri, nickname )
