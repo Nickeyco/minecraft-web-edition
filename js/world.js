@@ -57,7 +57,7 @@ World.prototype.createFlatWorld = function( height )
 // NOTE: The world must have already been created
 // with the appropriate size!
 
-const fs = require('fs');
+
 
 function loadSeed(seedFile) {
     const data = fs.readFileSync(`js/seeds/${seedFile}`, 'utf-8');
