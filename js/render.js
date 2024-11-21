@@ -97,11 +97,6 @@ function getVisibleChunks(playerPosition, range) {
     return visibleChunks;
 }
 
-// Llamar esta función en el bucle de renderizado
-const visibleChunks = getVisibleChunks(playerPosition, 32);
-renderChunks(visibleChunks);
-function Renderer( id )
-{
 	var canvas = this.canvas = document.getElementById( id );
 	canvas.renderer = this;
 	canvas.width = canvas.clientWidth;
@@ -184,7 +179,7 @@ function Renderer( id )
 	ctx.textBaseline = "middle";
 	ctx.font = "24px Minecraftia";
 	document.getElementsByTagName( "body" )[0].appendChild( textCanvas );
-}
+
 
 // draw()
 //
@@ -551,6 +546,10 @@ Renderer.prototype.setWorld = function( world, chunkSize )
 		}
 	}
 }
+
+const visibleChunks = getVisibleChunks(playerPosition, 32);
+this.loadShaders();
+
 
 // onBlockChanged( x, y, z )
 //
