@@ -25,7 +25,7 @@ BLOCK.AIR = {
 // Bedrock
 BLOCK.BEDROCK = {
 	id: 1,
-	spawnable: false,
+	spawnable: true,
 	transparent: false,
 	texture: function( world, lightmap, lit, x, y, z, dir ) { return [ 1/16, 1/16, 2/16, 2/16 ]; }
 };
@@ -103,8 +103,8 @@ BLOCK.BOOKCASE = {
 // Lava
 BLOCK.LAVA = {
 	id: 6,
-	spawnable: false,
-	transparent: true,
+	spawnable: true,
+	transparent: false,
 	selflit: true,
 	gravity: true,
 	fluid: true,
@@ -154,7 +154,6 @@ BLOCK.BRICK = {
 	fluid: false,
 	texture: function( world, lightmap, lit, x, y, z, dir ) { return [ 7/16, 0/16, 8/16, 1/16 ]; }
 };
-
 // Sand
 BLOCK.SAND = {
 	id: 11,
@@ -242,33 +241,67 @@ BLOCK.SPONGE = {
 	fluid: false,
 	texture: function( world, lightmap, lit, x, y, z, dir ) { return [ 0/16, 3/16, 1/16, 4/16 ]; }
 };
-// Leaves (Hojas)
-BLOCK.LEAVES = {
-    id: 20,
+BLOCK.WATER = {
+    id:19,
     spawnable: true,
-    transparent: true,
-    solid: false,
-    texture: function(world, lightmap, lit, x, y, z, dir) {
-        // Coordenadas de la textura de hojas normalizadas (celda 5, 4 del atlas)
-        return [5 / 16, 4 / 16, 6 / 16, 5 / 16];
-    },
-    color: function(world, x, y, z) {
-        const bioma = world.getBioma(x, y, z); // Determina el bioma según la posición
-        switch (bioma) {
-            case "forest":
-                return [34, 139, 34]; // Verde oscuro
-            case "jungle":
-                return [50, 205, 50]; // Verde brillante
-            case "swamp":
-                return [85, 107, 47]; // Verde grisáceo
-            case "desert":
-                return [210, 180, 140]; // Amarillo seco
-            default:
-                return [34, 139, 34]; // Color por defecto (bosque)
-        }
-    }
+    selflift: false,
+    gravity: true,
+    fluid: true,
+    texture: function(){}
+};
+// Leaves
+BLOCK.LEAVES = {
+	id: 20,
+	spawnable: true,
+	transparent: true, // Las hojas son parcialmente transparentes
+	selflit: false,
+	gravity: false,
+	fluid: false,
+	texture: function(world, lightmap, lit, x, y, z, dir) {
+		return [9/16, 1/16, 10/16, 2/16]; // Posición de la textura de hojas en el terrain.png
+	},
+	color: function(x, y, z) {
+		// Ajuste de color (ejemplo: verde oscuro con un poco de variación)
+		const baseColor = { r: 0.2, g: 0.8, b: 0.2, a: 1.0 }; // Verde
+		const variation = (x + y + z) % 3 * 0.05; // Variación sutil por coordenada
+		return {
+			r: baseColor.r + variation,
+			g: baseColor.g - variation,
+			b: baseColor.b + variation * 0.5,
+			a: baseColor.a
+		};
+	}
 };
 
+// Modificar pushVertices para aplicar color
+BLOCK.pushVertices = function(vertices, world, lightmap, x, y, z) {
+	var blocks = world.blocks;
+	var blockLit = z >= lightmap[x][y];
+	var block = blocks[x][y][z];
+	var bH = block.fluid && (z == world.sz - 1 || !blocks[x][y][z + 1].fluid) ? 0.9 : 1.0;
+
+	// Obtener color del bloque si tiene color definido
+	var blockColor = block.color ? block.color(x, y, z) : { r: 1.0, g: 1.0, b: 1.0, a: 1.0 };
+
+	// Top
+	if (z == world.sz - 1 || world.blocks[x][y][z + 1].transparent || block.fluid) {
+		var c = block.texture(world, lightmap, blockLit, x, y, z, DIRECTION.UP);
+
+		var lightMultiplier = z >= lightmap[x][y] ? 1.0 : 0.6;
+		if (block.selflit) lightMultiplier = 1.0;
+
+		pushQuad(
+			vertices,
+			[ x, y, z + bH, c[0], c[1], blockColor.r * lightMultiplier, blockColor.g * lightMultiplier, blockColor.b * lightMultiplier, blockColor.a ],
+			[ x + 1.0, y, z + bH, c[2], c[1], blockColor.r * lightMultiplier, blockColor.g * lightMultiplier, blockColor.b * lightMultiplier, blockColor.a ],
+			[ x + 1.0, y + 1.0, z + bH, c[2], c[3], blockColor.r * lightMultiplier, blockColor.g * lightMultiplier, blockColor.b * lightMultiplier, blockColor.a ],
+			[ x, y + 1.0, z + bH, c[0], c[3], blockColor.r * lightMultiplier, blockColor.g * lightMultiplier, blockColor.b * lightMultiplier, blockColor.a ]
+		);
+	}
+
+	// (Repetir el mismo proceso para los otros lados: Bottom, Front, Back, Left, Right)
+	// Usar blockColor en los colores de cada cara
+};
 
 // fromId( id )
 //
@@ -280,7 +313,7 @@ BLOCK.fromId = function( id )
 		if ( typeof( BLOCK[mat] ) == "object" && BLOCK[mat].id == id )
 			return BLOCK[mat];
 	return null;
-}
+};
 
 // pushVertices( vertices, world, lightmap, x, y, z )
 //
@@ -455,7 +488,7 @@ BLOCK.pushPickingVertices = function( vertices, x, y, z )
 		[ x + 1, y + 1, z + 1, 1, 1, color.r, color.g, color.b, 6/255 ],
 		[ x + 1, y, z + 1, 0, 0, color.r, color.g, color.b, 6/255 ]
 	);
-}
+};
 
 // Export to node.js
 if ( typeof( exports ) != "undefined" )

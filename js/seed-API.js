@@ -130,18 +130,14 @@ function canPlaceStructure(terrain, structure, startX, startY, minDistance) {
 function loadStructures() {
     const structureFiles = fs.readdirSync(STRUCTURES_FOLDER);
     return structureFiles.map((file) => {
-        try {
-            const structureData = fs.readFileSync(path.join(STRUCTURES_FOLDER, file), "utf8");
-            const tipo = file.includes("casa") || file.includes("biblioteca") ? "artificial" : "natural";
-            return {
-                tipo: tipo,
-                data: structureData.split("\n").map((line) => line.split("").map(Number))
-            };
-        } catch (error) {
-            console.error(`Error loading structure from ${file}: ${error.message}`);
-            return null; // O manejar el error de otra manera
-        }
-    }).filter(Boolean); // Filtrar valores nulos
+        const structureData = fs.readFileSync(path.join(STRUCTURES_FOLDER, file), "utf8");
+        // Definir el tipo de estructura basado en el nombre del archivo o algún criterio
+        const tipo = file.includes("casa") || file.includes("biblioteca") ? "artificial" : "natural";
+        return {
+            tipo: tipo,
+            data: structureData.split("\n").map((line) => line.split("").map(Number)) // Leer bloques de la estructura
+        };
+    });
 }
 
 // Guardar terreno en un archivo

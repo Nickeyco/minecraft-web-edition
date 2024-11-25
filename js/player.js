@@ -232,8 +232,8 @@ Player.prototype.update = function()
 		}
 		if ( walkVelocity.length() > 0 ) {
 				walkVelocity = walkVelocity.normal();
-				velocity.x = walkVelocity.x * 4;
-				velocity.y = walkVelocity.y * 4;
+				velocity.x = walkVelocity.x * 3;
+				velocity.y = walkVelocity.y * 3;
 		} else {
 			velocity.x /= this.falling ? 1.01 : 1.5;
 			velocity.y /= this.falling ? 1.01 : 1.5;

@@ -36,67 +36,9 @@ var fragmentSource =
 // Creates a new renderer with the specified canvas as target.
 //
 // id - Identifier of the HTML canvas element to render to.
-const PREFETCH_DISTANCE = 2; // Chunks adicionales a cargar
 
-function getPrefetchedChunks(playerPosition) {
-    const playerChunk = getChunkCoordinates(playerPosition);
-    const prefetchedChunks = [];
-
-    for (let x = -3; x <= 3; x++) {
-        for (let y = -3; y <= 3; y++) {
-            for (let z = -3; z <= 3; z++) {
-                const distance = Math.abs(x) + Math.abs(y) + Math.abs(z);
-                if (distance > 2 && distance <= PREFETCH_DISTANCE) {
-                    const chunkKey = `${playerChunk.x + x}_${playerChunk.y + y}_${playerChunk.z + z}`;
-                    if (chunks.has(chunkKey)) {
-                        prefetchedChunks.push(chunks.get(chunkKey));
-                    }
-                }
-            }
-        }
-    }
-
-    return prefetchedChunks;
-}
-
-const CHUNK_SIZE = 16; // Tamaño del chunk en bloques
-
-function getChunkCoordinates(blockPosition) {
-    return {
-        x: Math.floor(blockPosition.x / CHUNK_SIZE),
-        y: Math.floor(blockPosition.y / CHUNK_SIZE),
-        z: Math.floor(blockPosition.z / CHUNK_SIZE),
-    };
-}
-
-// Almacenar bloques en un mapa de chunks
-const chunks = new Map(); // Estructura: { 'chunkX_chunkY_chunkZ': [bloques] }
-
-function addBlockToChunk(block) {
-    const chunkCoords = getChunkCoordinates(block.position);
-    const chunkKey = `${chunkCoords.x}_${chunkCoords.y}_${chunkCoords.z}`;
-
-    if (!chunks.has(chunkKey)) {
-        chunks.set(chunkKey, []);
-    }
-
-    chunks.get(chunkKey).push(block);
-}
-
-function getVisibleChunks(playerPosition, range) {
-    const visibleChunks = [];
-    const [px, py, pz] = [playerPosition.x, playerPosition.y, playerPosition.z];
-    const chunkSize = 16; // Tamaño del chunk
-
-    for (let x = px - range; x <= px + range; x += chunkSize) {
-        for (let z = pz - range; z <= pz + range; z += chunkSize) {
-            visibleChunks.push({ x: Math.floor(x / chunkSize), z: Math.floor(z / chunkSize) });
-        }
-    }
-
-    return visibleChunks;
-}
-
+function Renderer( id )
+{
 	var canvas = this.canvas = document.getElementById( id );
 	canvas.renderer = this;
 	canvas.width = canvas.clientWidth;
@@ -179,7 +121,7 @@ function getVisibleChunks(playerPosition, range) {
 	ctx.textBaseline = "middle";
 	ctx.font = "24px Minecraftia";
 	document.getElementsByTagName( "body" )[0].appendChild( textCanvas );
-
+}
 
 // draw()
 //
@@ -547,10 +489,6 @@ Renderer.prototype.setWorld = function( world, chunkSize )
 	}
 }
 
-const visibleChunks = getVisibleChunks(playerPosition, 32);
-this.loadShaders();
-
-
 // onBlockChanged( x, y, z )
 //
 // Callback from world to inform the renderer of a changed block
@@ -644,11 +582,6 @@ Renderer.prototype.buildChunks = function( count )
 		if ( count == 0 ) break;
 	}
 }
-Renderer.prototype.applyBlockColor = function (block, x, y, z) {
-    const world = this.world; // Obtener el mundo actual
-    const color = block.color ? block.color(x, y, z, world) : [255, 255, 255]; // Color blanco por defecto
-    gl.vertexAttrib4f(this.uColor, color[0] / 255, color[1] / 255, color[2] / 255, 1.0); // Aplicar color RGBA
-};
 
 // setPerspective( fov, min, max )
 //
