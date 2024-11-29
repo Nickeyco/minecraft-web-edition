@@ -46,8 +46,8 @@
 
     // Configurar el renderizador
    	var render = new Renderer( "renderSurface" );
-	render.setWorld( world, 8 );
-	render.setPerspective( 60, 0.01, 200 );
+	render.setWorld( world, 16 );
+	render.setPerspective( 60, 0.01, 60 );
 
     // Crear el simulador de física
     var physics = new Physics();
@@ -76,7 +76,7 @@
         player.update();
 
         // Construir un chunk
-        render.buildChunks(400);
+        render.buildChunks( 2 );
 
         // Dibujar mundo
         render.setCamera(player.getEyePos().toArray(), player.angles);
