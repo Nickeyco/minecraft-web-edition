@@ -687,6 +687,36 @@ Renderer.prototype.buildChunks = function( count )
 }
 }
 
+Renderer.prototype.saveChunks = function() {
+    var gl = this.gl;
+    var world = this.world;
+    var playerPos = world.localPlayer.pos; // Obtener la posición del jugador
+    var renderDistance = this.renderDistance; // Obtener la distancia de renderizado
+
+    // Calcular los límites del rango de renderizado
+    var startX = Math.floor(playerPos.x - renderDistance);
+    var endX = Math.floor(playerPos.x + renderDistance);
+    var startY = Math.floor(playerPos.y - renderDistance);
+    var endY = Math.floor(playerPos.y + renderDistance);
+
+    for (var i = 0; i < this.chunks.length; i++) {
+        var chunk = this.chunks[i];
+
+        // Obtener las coordenadas del chunk
+        var chunkX = chunk.start[0];
+        var chunkY = chunk.start[1];
+
+        // Verificar si el chunk está fuera del rango de renderizado
+        if (chunkX < startX || chunkX > endX || chunkY < startY || chunkY > endY) {
+            if (chunk.buffer) {
+                gl.deleteBuffer(chunk.buffer); // Eliminar el buffer de WebGL
+                chunk.buffer = null; // Marcar el buffer como eliminado
+            }
+            chunk.dirty = true; // Marcar el chunk como sucio para que se pueda cargar de nuevo si es necesario
+        }
+    }
+};
+
 // setPerspective( fov, min, max )
 //
 // Sets the properties of the perspective projection.
