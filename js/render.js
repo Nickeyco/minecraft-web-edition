@@ -44,7 +44,10 @@ function Renderer( id )
 {
 
 	
-    this.renderDistance = 4; // Valor mínimo de renderDistance
+	Renderer.prototype.setRenderDistance = function(distance) {
+		this.renderDistance = distance;
+	};
+	
 	this.loadedTextures = {};
 	this.chunksToRender = [];
 
@@ -610,16 +613,33 @@ function pushQuad( v, p1, p2, p3, p4 )
 	v.push( p1[0], p1[1], p1[2], p1[3], p1[4], p1[5], p1[6], p1[7], p1[8] );
 }
 
+
+
 Renderer.prototype.buildChunks = function( count )
 {
 	var gl = this.gl;
 	var chunks = this.chunks;
 	var world = this.world;
+    var playerPos = world.localPlayer.pos; // Obtener la posición del jugador
+    var renderDistance = this.renderDistance; // Obtener la distancia de renderizado
+
+    // Calcular los límites del rango de renderizado
+    var startX = Math.floor(playerPos.x - renderDistance);
+    var endX = Math.floor(playerPos.x + renderDistance);
+    var startY = Math.floor(playerPos.y - renderDistance);
+    var endY = Math.floor(playerPos.y + renderDistance);
+
+
+
 	
-	for ( var i = 0; i < chunks.length; i++ )
-	{
-		var chunk = chunks[i];
+	for (var i = 0; i < chunks.length; i++) {
+        var chunk = chunks[i];
+
 		
+		var chunkX = chunk.start[0];
+        var chunkY = chunk.start[1];
+
+        if (chunkX >= startX && chunkX <= endX && chunkY >= startY && chunkY <= endY) {
 		if ( chunk.dirty )
 		{
 			var vertices = [];
@@ -664,6 +684,7 @@ Renderer.prototype.buildChunks = function( count )
 		
 		if ( count == 0 ) break;
 	}
+}
 }
 
 // setPerspective( fov, min, max )
