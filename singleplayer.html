@@ -29,16 +29,23 @@
 		</table>
 		
 		<!-- Initialisation code -->
-		<script type="text/javascript">			
+		<script type="text/javascript">		
+		
+
 			// Create a new flat world
-			var world = new World( 50, 50, 50 );
-			world.createFlatWorld( 24 );
+			var world = new World( 64, 64, 64 );
+			world.createFlatWorld( 32 );
 			
+		    // Establecer la distancia de renderizado a x chunks
+            var renderDistance = 8; // Puedes ajustar este valor según lo necesites
+
 			// Set up renderer
 			var render = new Renderer( "renderSurface" );
 			render.setWorld( world, 8 );
-			render.setPerspective( 60, 0.01, 80 );
-			
+			render.setPerspective( 60, 0.01, 60 );
+			render.setRenderDistance(renderDistance); // Establecer la distancia de renderizado
+
+
 			// Create physics simulator
 			var physics = new Physics();
 			physics.setWorld( world );
@@ -49,6 +56,8 @@
 			player.setInputCanvas( "renderSurface" );
 			player.setMaterialSelector( "materialSelector" );
 			
+
+
 			// Render loop			
 			setInterval( function()
 			{
@@ -63,14 +72,15 @@
 				player.update();
 				
 				// Build a chunk
-				render.buildChunks( 8 );
+				render.buildChunks( 1 );
 				
 				// Draw world
 				render.setCamera( player.getEyePos().toArray(), player.angles );
 				render.draw();
 				
-				while ( new Date().getTime() / 1000 - time < 0.014 );
+				while ( new Date().getTime() / 1000 - time < 0.016 );
 			}, 1 );
+			
 		</script>
 	</body>
 </html>
