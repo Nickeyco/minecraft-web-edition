@@ -37,8 +37,17 @@ var fragmentSource =
 //
 // id - Identifier of the HTML canvas element to render to.
 
+// render.js
+
+
 function Renderer( id )
 {
+
+	
+    this.renderDistance = 4; // Valor mínimo de renderDistance
+	this.loadedTextures = {};
+	this.chunksToRender = [];
+
 	var canvas = this.canvas = document.getElementById( id );
 	canvas.renderer = this;
 	canvas.width = canvas.clientWidth;
@@ -121,11 +130,16 @@ function Renderer( id )
 	ctx.textBaseline = "middle";
 	ctx.font = "24px Minecraftia";
 	document.getElementsByTagName( "body" )[0].appendChild( textCanvas );
+
+
+
+
 }
 
 // draw()
 //
 // Render one frame of the world to the canvas.
+
 
 Renderer.prototype.draw = function()
 {
@@ -136,6 +150,19 @@ Renderer.prototype.draw = function()
 	gl.viewport( 0, 0, gl.viewportWidth, gl.viewportHeight );
 	gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
 	
+      
+		// Dibujar los chunks que están en el rango de visión
+		for (var chunk of this.chunksToRender) {
+			if (this.isTextureLoaded(chunk.x, chunk.y, chunk.z)) {
+				this.drawChunk(chunk.x, chunk.y, chunk.z); // Método para dibujar el chunk
+			}
+		}
+	
+		// ... resto del código de dibujo
+	
+	
+	
+
 	// Draw level chunks
 	var chunks = this.chunks;
 	
@@ -235,6 +262,11 @@ Renderer.prototype.draw = function()
 	
 	mat4.identity( this.modelMatrix );
 	gl.uniformMatrix4fv( this.uModelMat, false, this.modelMatrix );
+
+	// drawChunk(x, y, z)
+	Renderer.prototype.drawChunk = function(x, y, z) {
+		// Implementa la lógica para dibujar el chunk en la posición (x, y, z)
+	};
 }
 
 // buildPlayerName( nickname )
@@ -438,6 +470,8 @@ Renderer.prototype.loadShaders = function()
 	if ( !gl.getShaderParameter( fragmentShader, gl.COMPILE_STATUS ) )
 		throw "Could not compile fragment shader!\n" + gl.getShaderInfoLog( fragmentShader );
 	
+    
+
 	// Finish program
 	gl.linkProgram( program );
 	
@@ -510,8 +544,57 @@ Renderer.prototype.onBlockChanged = function( x, y, z )
 		else if ( y >= chunks[i].start[1] && y < chunks[i].end[1] && z >= chunks[i].start[2] && z < chunks[i].end[2] && ( x == chunks[i].end[0] || x == chunks[i].start[0] - 1 ) )
 			chunks[i].dirty = true;
 	}
-}
 
+    // updateChunks()
+	Renderer.prototype.updateChunks = function() {
+		var playerPos = this.world.localPlayer.pos;
+		var chunkSize = this.chunkSize; // Tamaño del chunk
+		var renderDistance = this.renderDistance; // Distancia de renderizado
+	
+		// Calcular el rango de chunks a renderizar
+		var startX = Math.floor((playerPos.x - renderDistance * chunkSize) / chunkSize);
+		var endX = Math.floor((playerPos.x + renderDistance * chunkSize) / chunkSize);
+		var startY = Math.floor((playerPos.y - renderDistance * chunkSize) / chunkSize);
+		var endY = Math.floor((playerPos.y + renderDistance * chunkSize) / chunkSize);
+		
+		// Mantener la altura completa
+		var maxHeight = this.world.sz; // Altura total del mundo
+	
+		this.chunksToRender = []; // Inicializar el array de chunks a renderizar
+	
+		// Actualizar solo los chunks alrededor del jugador
+		for (var x = startX; x <= endX; x++) {
+			for (var y = startY; y <= endY; y++) {
+				for (var z = 0; z < maxHeight; z++) {
+					var block = this.world.getBlock(x, y, z);
+					if (block != BLOCK.AIR) {
+						this.chunksToRender.push({ x: x, y: y, z: z });
+	
+						// Cargar texturas solo si el chunk está dentro del rango de visión
+						if (!this.isTextureLoaded(x, y, z)) {
+							this.loadChunkTexture(x, y, z);
+						}
+					}
+				}
+			}
+		}
+	};
+
+}
+// isTextureLoaded(x, y, z)
+Renderer.prototype.isTextureLoaded = function(x, y, z) {
+    return this.loadedTextures[`${x},${y},${z}`] || false;
+};
+
+// loadChunkTexture(x, y, z)
+Renderer.prototype.loadChunkTexture = function(x, y, z) {
+    this.loadedTextures[`${x},${y},${z}`] = true; // Marca la textura como cargada
+	// isTextureLoaded(x, y, z)
+Renderer.prototype.isTextureLoaded = function(x, y, z) {
+    return this.loadedTextures[`${x},${y},${z}`] || false;
+};
+    // Aquí puedes agregar el código para cargar la textura real
+};
 // buildChunks( count )
 //
 // Build up to <count> dirty chunks.
@@ -635,6 +718,10 @@ Renderer.prototype.drawBuffer = function( buffer )
 	
 	gl.drawArrays( gl.TRIANGLES, 0, buffer.vertices );
 }
+
+
+
+
 
 // loadPlayerHeadModel()
 //
@@ -997,3 +1084,31 @@ Renderer.prototype.loadPlayerBodyModel = function()
 	gl.bindBuffer( gl.ARRAY_BUFFER, buffer );
 	gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( vertices ), gl.DYNAMIC_DRAW );
 }
+Renderer.prototype.updateChunks = function() {
+    var playerPos = this.world.localPlayer.pos;
+    var chunkSize = this.chunkSize; // Tamaño del chunk
+    var halfChunkSize = chunkSize / 2; // 1/2 chunk
+    var renderDistance = 4; // Distancia de renderizado (en chunks)
+
+    // Calcular el rango de chunks a renderizar
+    var startX = Math.floor((playerPos.x - renderDistance * halfChunkSize) / chunkSize);
+    var endX = Math.floor((playerPos.x + renderDistance * halfChunkSize) / chunkSize);
+    var startY = Math.floor((playerPos.y - renderDistance * halfChunkSize) / chunkSize);
+    var endY = Math.floor((playerPos.y + renderDistance * halfChunkSize) / chunkSize);
+    
+    // Mantener la altura completa
+    var maxHeight = this.world.sz; // Altura total del mundo
+
+    this.chunksToRender = []; // Inicializar el array de chunks a renderizar
+
+    // Actualizar solo los chunks alrededor del jugador
+    for (var x = startX; x <= endX; x++) {
+        for (var y = startY; y <= endY; y++) {
+            for (var z = 0; z < maxHeight; z++) {
+                if (this.world.getBlock(x, y, z) != BLOCK.AIR) {
+                    this.chunksToRender.push({ x: x, y: y, z: z });
+                }
+            }
+        }
+    }
+};
