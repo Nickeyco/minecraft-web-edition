@@ -33,11 +33,11 @@
 		
 
 			// Create a new flat world
-			var world = new World( 64, 64, 64 );
-			world.createFlatWorld( 32 );
+			var world = new World( 82, 82, 72 );
+			world.createFlatWorld( 42 );
 			
 		    // Establecer la distancia de renderizado a x chunks
-            var renderDistance = 8; // Puedes ajustar este valor según lo necesites
+            var renderDistance = 16; // Puedes ajustar este valor según lo necesites
 
 			// Set up renderer
 			var render = new Renderer( "renderSurface" );
@@ -65,6 +65,9 @@
 
 				render.updateChunks();
 				
+				// Guardar chunks que están fuera del rango de renderizado
+				render.saveChunks();
+
 				// Simulate physics
 				physics.simulate();
 				
