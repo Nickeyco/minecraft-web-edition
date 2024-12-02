@@ -31,8 +31,8 @@
 		<!-- Initialisation code -->
 		<script type="text/javascript">			
 			// Create a new flat world
-			var world = new World( 64, 64, 64 );
-			world.createFlatWorld( 32 );
+			var world = new World( 50, 50, 50 );
+			world.createFlatWorld( 24 );
 			
 			// Set up renderer
 			var render = new Renderer( "renderSurface" );
@@ -69,7 +69,7 @@
 				render.setCamera( player.getEyePos().toArray(), player.angles );
 				render.draw();
 				
-				while ( new Date().getTime() / 1000 - time < 0.016 );
+				while ( new Date().getTime() / 1000 - time < 0.014 );
 			}, 1 );
 		</script>
 	</body>
