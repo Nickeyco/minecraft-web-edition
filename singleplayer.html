@@ -33,17 +33,18 @@
 		
 
 			// Create a new flat world
-			var world = new World( 82, 82, 72 );
-			world.createFlatWorld( 42 );
+			var world = new World( 82, 82, 64 );
+			world.createFlatWorld( 32 );
 			
 		    // Establecer la distancia de renderizado a x chunks
-            var renderDistance = 16; // Puedes ajustar este valor según lo necesites
+            var renderDistance = 32; // Puedes ajustar este valor según lo necesites
 
 			// Set up renderer
 			var render = new Renderer( "renderSurface" );
 			render.setWorld( world, 8 );
-			render.setPerspective( 60, 0.01, 18 );
+			render.setPerspective( 60, 0.01, 20 );
 			render.setRenderDistance(renderDistance); // Establecer la distancia de renderizado
+			
 
 
 			// Create physics simulator
@@ -75,7 +76,7 @@
 				player.update();
 				
 				// Build a chunk
-				render.buildChunks( 1 );
+				render.buildChunks( 8 );
 				
 				// Draw world
 				render.setCamera( player.getEyePos().toArray(), player.angles );
