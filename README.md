@@ -2,9 +2,11 @@ WebCraft (HTML5 Minecraft)
 ---------------------
 
 BIG Warning
-**This project is no longer actively maintained!**
+**The original project is no longer actively maintained!**
 also this project does not belong to me if you want to see the original basegame go look for Overv in github
 also thanks you overv for doing this masterpiece https://github.com/Overv/WebCraft 👋wave hand
+
+¿wanna try it? go here -> https://nickeyco.github.io/minecraft-web-edition/
 
 [![GitHub issues](https://img.shields.io/github/issues/Overv/WebCraft.svg)](https://github.com/Overv/WebCraft/issues)
 [![GitHub forks](https://img.shields.io/github/forks/Overv/WebCraft.svg)](https://github.com/Overv/WebCraft/network)
