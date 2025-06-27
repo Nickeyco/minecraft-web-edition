@@ -6,7 +6,7 @@ BIG Warning
 also this project does not belong to me if you want to see the original basegame go look for Overv in github
 also thanks you overv for doing this masterpiece https://github.com/Overv/WebCraft 👋wave hand
 
-¿wanna try it? go here -> [](https://nikey-64.github.io/minecraft-web-edition/)  (also for some reason you need to reload the page from the url space in singleplayer)
+¿wanna try it? go here -> [Minecraft-web-edition](https://nikey-64.github.io/minecraft-web-edition/)  (also for some reason you need to reload the page from the url space in singleplayer)
 
 [![GitHub issues](https://img.shields.io/github/issues/Overv/WebCraft.svg)](https://github.com/Overv/WebCraft/issues)
 [![GitHub forks](https://img.shields.io/github/forks/Overv/WebCraft.svg)](https://github.com/Overv/WebCraft/network)
